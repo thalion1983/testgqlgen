@@ -10,7 +10,11 @@ type Resolver struct{}
 
 // Users is the resolver for the users field.
 func (r *queryResolver) Users(ctx context.Context) ([]*User, error) {
-	panic("not implemented")
+	// Mocked result
+	return []*User {
+		{ID: "32", Name: "Primera", Age: 65,},
+		{ID: "20", Name: "Segunda", Age: 34,},
+	}, nil
 }
 
 // Query returns QueryResolver implementation.
