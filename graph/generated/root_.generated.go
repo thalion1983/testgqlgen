@@ -41,12 +41,22 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	App struct {
+		ID   func(childComplexity int) int
+		Name func(childComplexity int) int
+		Size func(childComplexity int) int
+	}
+
 	Mutation struct {
+		AddApp     func(childComplexity int, input model.NewApp) int
 		CreateUser func(childComplexity int, input model.NewUser) int
+		DeleteApp  func(childComplexity int, id string) int
 		RemoveUser func(childComplexity int, id int) int
 	}
 
 	Query struct {
+		App   func(childComplexity int, id string) int
+		Apps  func(childComplexity int) int
 		Users func(childComplexity int) int
 	}
 
@@ -76,6 +86,39 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
+	case "App.id":
+		if e.complexity.App.ID == nil {
+			break
+		}
+
+		return e.complexity.App.ID(childComplexity), true
+
+	case "App.name":
+		if e.complexity.App.Name == nil {
+			break
+		}
+
+		return e.complexity.App.Name(childComplexity), true
+
+	case "App.size":
+		if e.complexity.App.Size == nil {
+			break
+		}
+
+		return e.complexity.App.Size(childComplexity), true
+
+	case "Mutation.addApp":
+		if e.complexity.Mutation.AddApp == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_addApp_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AddApp(childComplexity, args["input"].(model.NewApp)), true
+
 	case "Mutation.createUser":
 		if e.complexity.Mutation.CreateUser == nil {
 			break
@@ -88,6 +131,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateUser(childComplexity, args["input"].(model.NewUser)), true
 
+	case "Mutation.deleteApp":
+		if e.complexity.Mutation.DeleteApp == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteApp_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteApp(childComplexity, args["id"].(string)), true
+
 	case "Mutation.removeUser":
 		if e.complexity.Mutation.RemoveUser == nil {
 			break
@@ -99,6 +154,25 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.RemoveUser(childComplexity, args["id"].(int)), true
+
+	case "Query.app":
+		if e.complexity.Query.App == nil {
+			break
+		}
+
+		args, err := ec.field_Query_app_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.App(childComplexity, args["id"].(string)), true
+
+	case "Query.apps":
+		if e.complexity.Query.Apps == nil {
+			break
+		}
+
+		return e.complexity.Query.Apps(childComplexity), true
 
 	case "Query.users":
 		if e.complexity.Query.Users == nil {
@@ -136,6 +210,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputNewApp,
 		ec.unmarshalInputNewUser,
 	)
 	first := true
@@ -234,16 +309,20 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "../user.graphql", Input: `type Mutation {
+	{Name: "../mutation.graphql", Input: `type Mutation {
 	createUser(input: NewUser!): User!
 	removeUser(id: Int!): User!
+	addApp(input: NewApp!): App!
+	deleteApp(id: ID!): App!
 }
-
-type Query {
+`, BuiltIn: false},
+	{Name: "../query.graphql", Input: `type Query {
 	users: [User!]!
+	app(id: ID!): App!
+	apps: [App!]!
 }
-
-input NewUser {
+`, BuiltIn: false},
+	{Name: "../types.graphql", Input: `input NewUser {
 	name: String!
 	age: Int!
 }
@@ -252,6 +331,17 @@ type User {
 	id: Int!
 	name: String!
 	age: Int!
+}
+
+input NewApp {
+	name: String!
+	size: Int
+}
+
+type App {
+	id: ID!
+	name: String!
+	size: Int
 }
 `, BuiltIn: false},
 }

@@ -15,14 +15,18 @@ const port = "8080"
 
 // Mocked Database
 var (
-	users []*model.User
-	maxID int = 0
+	users  []*model.User
+	LastID int = 0
+	apps   []*model.App
 )
 
 func main() {
 	resolver := &graph.Resolver{
-		UserList: users,
-		MaxID:    &maxID,
+		UserList: &graph.Users{
+			List:   users,
+			LastID: &LastID,
+		},
+		AppList: apps,
 	}
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolver}))
 

@@ -1,0 +1,21 @@
+input NewUser {
+	name: String!
+	age: Int!
+}
+
+type User {
+	id: Int!
+	name: String!
+	age: Int!
+}
+
+input NewApp {
+	name: String!
+	size: Int
+}
+
+type App {
+	id: ID!
+	name: String!
+	size: Int
+}

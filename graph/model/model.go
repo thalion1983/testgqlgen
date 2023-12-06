@@ -2,6 +2,17 @@
 
 package model
 
+type App struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	Size *int   `json:"size,omitempty"`
+}
+
+type NewApp struct {
+	Name string `json:"name"`
+	Size *int   `json:"size,omitempty"`
+}
+
 type NewUser struct {
 	Name string `json:"name"`
 	Age  int    `json:"age"`

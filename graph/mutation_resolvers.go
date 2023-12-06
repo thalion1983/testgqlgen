@@ -8,44 +8,57 @@ import (
 	"context"
 	"testgqlgen/graph/generated"
 	"testgqlgen/graph/model"
+
+	"github.com/google/uuid"
 )
 
 // CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (*model.User, error) {
-	*r.MaxID = *r.MaxID + 1
+	*r.UserList.LastID = *r.UserList.LastID + 1
 	newUser := &model.User{
-		ID:   *r.MaxID,
+		ID:   *r.UserList.LastID,
 		Name: input.Name,
 		Age:  input.Age,
 	}
-	r.UserList = append(r.UserList, newUser)
+	r.UserList.List = append(r.UserList.List, newUser)
 	return newUser, nil
 }
 
 // RemoveUser is the resolver for the removeUser field.
 func (r *mutationResolver) RemoveUser(ctx context.Context, id int) (*model.User, error) {
-	for u, user := range r.UserList {
+	for u, user := range r.UserList.List {
 		if user.ID == id {
-			r.UserList = append(r.UserList[:u], r.UserList[u+1:]...)
+			r.UserList.List = append(r.UserList.List[:u], r.UserList.List[u+1:]...)
 			return user, nil
 		}
 	}
 	return nil, nil
 }
 
-// Users is the resolver for the users field.
-func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
-	if len(r.UserList) == 0 {
-		return nil, nil
+// AddApp is the resolver for the addApp field.
+func (r *mutationResolver) AddApp(ctx context.Context, input model.NewApp) (*model.App, error) {
+	id := uuid.New().String()
+	newApp := &model.App{
+		ID:   id,
+		Name: input.Name,
+		Size: input.Size,
 	}
-	return r.UserList, nil
+	r.AppList = append(r.AppList, newApp)
+	return newApp, nil
+}
+
+// DeleteApp is the resolver for the deleteApp field.
+func (r *mutationResolver) DeleteApp(ctx context.Context, id string) (*model.App, error) {
+	for u, app := range r.AppList {
+		if app.ID == id {
+			r.AppList = append(r.AppList[:u], r.AppList[u+1:]...)
+			return app, nil
+		}
+	}
+	return nil, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
-// Query returns generated.QueryResolver implementation.
-func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
-
 type mutationResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }

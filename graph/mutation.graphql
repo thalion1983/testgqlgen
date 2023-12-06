@@ -1,0 +1,6 @@
+type Mutation {
+	createUser(input: NewUser!): User!
+	removeUser(id: Int!): User!
+	addApp(input: NewApp!): App!
+	deleteApp(id: ID!): App!
+}
