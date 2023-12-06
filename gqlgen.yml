@@ -1,0 +1,15 @@
+schema:
+  - graph/*.graphql
+exec:
+  layout: follow-schema
+  dir: graph/generated
+  package: generated
+  filename_template: "{name}_generated.go"
+model:
+  package: model
+  filename: "graph/model/model.go"
+resolver:
+  layout: follow-schema
+  dir: graph
+  package: graph
+  filename_template: "{name}_resolvers.go"
