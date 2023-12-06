@@ -1,9 +1,19 @@
+type Mutation {
+	createUser(input: NewUser!): User!
+	removeUser(id: Int!): User!
+}
+
 type Query {
 	users: [User!]!
 }
 
+input NewUser {
+	name: String!
+	age: Int!
+}
+
 type User {
-	id: ID!
+	id: Int!
 	name: String!
 	age: Int!
 }

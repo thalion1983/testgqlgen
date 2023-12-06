@@ -2,8 +2,13 @@
 
 package graph
 
+type NewUser struct {
+	Name string `json:"name"`
+	Age  int    `json:"age"`
+}
+
 type User struct {
-	ID   string `json:"id"`
+	ID   int    `json:"id"`
 	Name string `json:"name"`
 	Age  int    `json:"age"`
 }
